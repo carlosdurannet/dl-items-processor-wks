@@ -1,0 +1,4 @@
+Bundle-Name: dl-items-processor-cpanel
+Bundle-SymbolicName: net.carlosduran.dl.items.processor
+Bundle-Version: 1.0.0
+Export-Package: net.carlosduran.dl.items.processor.constants
