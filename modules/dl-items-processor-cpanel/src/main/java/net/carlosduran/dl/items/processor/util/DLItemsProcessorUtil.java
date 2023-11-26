@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class DLItemsProcessorUtil {
@@ -216,4 +217,40 @@ public class DLItemsProcessorUtil {
 
         return urls;
     }
+
+    public static void unzip(UploadPortletRequest uploadPortletRequest) {
+        try(InputStream inputStream = uploadPortletRequest.getFileAsStream("zipFile")) {
+            try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+                // Iterar sobre las entradas del archivo zip
+                ZipEntry zipEntry;
+                while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                    // Nombre del archivo descomprimido
+                    String nombreArchivo = zipEntry.getName();
+
+                    // Ruta completa del archivo descomprimido
+                    String rutaCompleta = getOperationDirectory() + File.separator + "unzipped" + File.separator + nombreArchivo;
+                    File itemDirectory = new File(new File(rutaCompleta).getParent());
+
+                    // Crear directorios si no existen
+                    itemDirectory.mkdirs();
+
+                    // Crear el archivo de destino
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(rutaCompleta)) {
+                        // Leer y escribir los datos del archivo
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zipInputStream.read(buffer)) > 0) {
+                            fileOutputStream.write(buffer, 0, len);
+                        }
+                    }
+
+                    // Cerrar la entrada del archivo zip actual
+                    zipInputStream.closeEntry();
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
 }
