@@ -28,6 +28,9 @@ public class UploadItemsMVCActionCommand extends BaseMVCActionCommand {
     protected void doProcessAction(ActionRequest actionRequest, ActionResponse actionResponse) throws Exception {
         DLItemsProcessorUtil.generateOperationDirectory();
         DLItemsProcessorUtil.unzip(PortalUtil.getUploadPortletRequest(actionRequest));
+        DLItemsProcessorUtil.uploadItems();
+
+
         actionResponse.sendRedirect(ParamUtil.getString(actionRequest, "redirect"));
     }
 

@@ -1,12 +1,22 @@
 package net.carlosduran.dl.items.processor.util;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLVersionNumberIncrease;
+import com.liferay.document.library.kernel.service.DLAppHelperLocalService;
+import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.*;
 import java.io.*;
@@ -14,9 +24,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -221,35 +229,90 @@ public class DLItemsProcessorUtil {
     public static void unzip(UploadPortletRequest uploadPortletRequest) {
         try(InputStream inputStream = uploadPortletRequest.getFileAsStream("zipFile")) {
             try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
-                // Iterar sobre las entradas del archivo zip
                 ZipEntry zipEntry;
                 while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                    // Nombre del archivo descomprimido
-                    String nombreArchivo = zipEntry.getName();
+                    if(isValidZipEntry(zipEntry)) {
+                        String nombreArchivo = zipEntry.getName();
+                        _log.info("Encontrado " + nombreArchivo);
 
-                    // Ruta completa del archivo descomprimido
-                    String rutaCompleta = getOperationDirectory() + File.separator + "unzipped" + File.separator + nombreArchivo;
-                    File itemDirectory = new File(new File(rutaCompleta).getParent());
+                        String rutaCompleta = getOperationDirectory() + File.separator + "unzipped" + File.separator + nombreArchivo;
 
-                    // Crear directorios si no existen
-                    itemDirectory.mkdirs();
+                        File itemDirectory = new File(new File(rutaCompleta).getParent());
 
-                    // Crear el archivo de destino
-                    try (FileOutputStream fileOutputStream = new FileOutputStream(rutaCompleta)) {
-                        // Leer y escribir los datos del archivo
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while ((len = zipInputStream.read(buffer)) > 0) {
-                            fileOutputStream.write(buffer, 0, len);
+                        itemDirectory.mkdirs();
+
+                        try (FileOutputStream fileOutputStream = new FileOutputStream(rutaCompleta)) {
+                            byte[] buffer = new byte[1024];
+                            int len;
+                            while ((len = zipInputStream.read(buffer)) > 0) {
+                                fileOutputStream.write(buffer, 0, len);
+                            }
                         }
                     }
 
-                    // Cerrar la entrada del archivo zip actual
+
+
                     zipInputStream.closeEntry();
                 }
             }
         } catch (Exception e) {
 
+        }
+    }
+
+    private static boolean isValidZipEntry(ZipEntry zipEntry) {
+        String[] entryPath = zipEntry.getName().split("/");
+        return (entryPath.length == 3 && entryPath[2].trim().length() > 0);
+    }
+
+    public static void uploadItems() {
+        File baseDirectory = new File(getOperationDirectory() + File.separator + "unzipped");
+        uploadItems(baseDirectory);
+
+    }
+
+    private static void uploadItems(File baseDirectory) {
+        Map<Long, List<String>> itemsMap = new HashMap<>();
+
+        Arrays.stream(baseDirectory.listFiles())
+                .forEach(groupDirectory -> {
+                    long groupId = Long.parseLong(groupDirectory.getName());
+
+                    Arrays.stream(groupDirectory.listFiles())
+                            .forEach(uuidDirectory -> {
+                                String uuid = uuidDirectory.getName();
+                                File dlItem = uuidDirectory.listFiles()[0];
+                                try {
+                                    DLFileEntry dlFileEntry =
+                                            DLFileEntryLocalServiceUtil
+                                                    .getDLFileEntryByUuidAndGroupId(uuid, groupId);
+                                    _log.info("Encontrado " + dlFileEntry.getFileName());
+                                    uploadFileToDLFileEntry(dlItem, dlFileEntry);
+                                    _log.info("Subido " + dlFileEntry + " v." + dlFileEntry.getVersion());
+                                } catch (Exception e) {
+                                    _log.error(e.getMessage());
+                                }
+                            });
+                });
+    }
+
+    private static void uploadFileToDLFileEntry(File dlItem, DLFileEntry dlFileEntry) {
+        ServiceContext serviceContext = new ServiceContext();
+        try (InputStream inputStream = Files.newInputStream(dlItem.toPath())){
+            DLAppServiceUtil.updateFileEntry(
+                    dlFileEntry.getFileEntryId(),
+                    dlFileEntry.getFileName(),
+                    dlFileEntry.getMimeType(),
+                    dlFileEntry.getTitle(),
+                    dlFileEntry.getDescription(),
+                    null,
+                    DLVersionNumberIncrease.AUTOMATIC,
+                    inputStream,
+                    dlItem.length(),
+                    serviceContext
+            );
+        } catch (Exception e) {
+            _log.error(e);
         }
     }
 

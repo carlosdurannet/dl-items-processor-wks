@@ -2,13 +2,13 @@
 <%@ page import="net.carlosduran.dl.items.processor.constants.MVCCommandNames" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="uploadItemsURL" name="<%= MVCCommandNames.DOWNLOAD_ITEMS_ACTION %>"></portlet:actionURL>
+<portlet:actionURL var="downloadImagesURL" name="<%= MVCCommandNames.DOWNLOAD_ITEMS_ACTION %>"/>
 
 <div class="p-4">
     <clay:container fluid="false">
         <clay:row>
             <clay:col>
-                <h2><liferay-ui:message key="download-items"></liferay-ui:message></h2>
+                <h2><liferay-ui:message key="download-items"/></h2>
             </clay:col>
         </clay:row>
         <clay:row>
@@ -17,9 +17,9 @@
                         enctype="application/x-www-form-urlencoded"
                         method="post"
                         action="${ downloadImagesURL }">
-                    <aui:input label="urls.file" name="urls" type="file"></aui:input>
+                    <aui:input label="urls.file" name="urls" type="file"/>
                     <aui:button-row>
-                        <aui:button type="submit" value="upload"></aui:button>
+                        <aui:button type="submit" value="upload"/>
                         <c:if test="${ fileUploaded }">
                             <portlet:resourceURL var="downloadZipFileURL"
                                                  id="<%= MVCCommandNames.DOWNLOAD_ZIP_RESOURCE %>"/>

@@ -25,7 +25,6 @@ public class DownloadItemsMVCRenderCommand implements MVCRenderCommand {
 
     @Override
     public String render(RenderRequest renderRequest, RenderResponse renderResponse) throws PortletException {
-        _log.info("render()");
         boolean fileUploaded = DLItemsProcessorUtil.getBoolean(renderRequest, Params.FILE_UPLOADED);
         _log.info("File Uploaded: " + fileUploaded);
         renderRequest.setAttribute(
