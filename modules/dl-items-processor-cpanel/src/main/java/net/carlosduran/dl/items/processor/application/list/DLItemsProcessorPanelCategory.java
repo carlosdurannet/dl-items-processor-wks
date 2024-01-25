@@ -36,7 +36,7 @@ public class DLItemsProcessorPanelCategory extends BasePanelCategory {
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", locale, getClass());
 
-		return LanguageUtil.get(resourceBundle, "category.ama");
+		return LanguageUtil.get(resourceBundle, "category.my-tools");
 	}
 
 }
