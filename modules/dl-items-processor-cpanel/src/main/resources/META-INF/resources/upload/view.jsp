@@ -2,22 +2,23 @@
 <%@ page import="net.carlosduran.dl.items.processor.constants.MVCCommandNames" %>
 <%@ include file="../init.jsp" %>
 
-<portlet:actionURL var="downloadImagesURL" name="<%= MVCCommandNames.DOWNLOAD_ITEMS_ACTION %>"/>
+<portlet:actionURL var="uploadItemsURL" name="<%= MVCCommandNames.UPLOAD_ITEMS_ACTION %>"/>
 
 <div class="p-4">
     <clay:container fluid="false">
         <clay:row>
             <clay:col>
-                <h2><liferay-ui:message key="download-items"/></h2>
+                <h2><liferay-ui:message key="upload-items"/></h2>
             </clay:col>
         </clay:row>
         <clay:row>
             <clay:col>
                 <aui:form
+                        accept="application/zip"
                         enctype="application/x-www-form-urlencoded"
                         method="post"
-                        action="${ downloadImagesURL }">
-                    <aui:input label="urls.file" name="urls" type="file"/>
+                        action="${ uploadItemsURL }">
+                    <aui:input label="zip.file" name="zipFile" type="file"/>
                     <aui:button-row>
                         <aui:button type="submit" value="upload"/>
                         <c:if test="${ fileUploaded }">

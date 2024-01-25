@@ -17,11 +17,11 @@ import javax.portlet.RenderResponse;
         immediate = true,
         property = {
                 "javax.portlet.name=" + DLItemsProcessorPortletKeys.DLITEMSPROCESSOR,
-                "mvc.command.name=" + MVCCommandNames.DOWNLOAD_ITEMS_VIEW
+                "mvc.command.name=" + MVCCommandNames.UPLOAD_ITEMS_VIEW
         },
         service = MVCRenderCommand.class
 )
-public class DownloadItemsMVCRenderCommand implements MVCRenderCommand {
+public class UploadItemsMVCRenderCommand implements MVCRenderCommand {
 
     @Override
     public String render(RenderRequest renderRequest, RenderResponse renderResponse) throws PortletException {
@@ -30,9 +30,9 @@ public class DownloadItemsMVCRenderCommand implements MVCRenderCommand {
         renderRequest.setAttribute(
                 Params.FILE_UPLOADED, fileUploaded);
 
-        return "/download/view.jsp";
+        return "/upload/view.jsp";
     }
 
-    private static final Log _log = LogFactoryUtil.getLog(DownloadItemsMVCRenderCommand.class);
+    private static final Log _log = LogFactoryUtil.getLog(UploadItemsMVCRenderCommand.class);
 
 }

@@ -5,7 +5,7 @@
 	<portlet:param name="mvcRenderCommandName" value="<%= MVCCommandNames.DOWNLOAD_ITEMS_VIEW %>"/>
 </portlet:renderURL>
 <portlet:renderURL var="loadItemsURL">
-	<portlet:param name="mvcRenderCommandName" value="<%= MVCCommandNames.LOAD_ITEMS_VIEW %>"/>
+	<portlet:param name="mvcRenderCommandName" value="<%= MVCCommandNames.UPLOAD_ITEMS_VIEW %>"/>
 </portlet:renderURL>
 
 
